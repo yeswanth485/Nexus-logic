@@ -1,4 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { auth } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import LandingPage from "./pages/LandingPage";
 import Signin from "./pages/Auth/Signin";
 import DemoRequest from "./pages/Auth/DemoRequest";
@@ -17,6 +20,34 @@ import ReportsAnalytics from "./pages/ReportsAnalytics";
 import AdminIntegrations from "./pages/AdminIntegrations";
 import Profile from "./pages/Profile";
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] text-[var(--text-primary)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent-primary)]"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth/signin" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -25,7 +56,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth/signin" element={<Signin />} />
           <Route path="/auth/demo" element={<DemoRequest />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
             <Route index element={<OverviewDashboard />} />
             <Route path="tracking" element={<ShipmentTracking />} />
             <Route path="fleet" element={<FleetIntelligence />} />
