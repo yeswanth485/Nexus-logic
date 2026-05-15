@@ -45,7 +45,8 @@ export default function AIInsights() {
     };
     
     try {
-      const response = await fetch(import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL + '/api/ai-chat' : '/api/ai-chat', {
+      const baseUrl = import.meta.env.VITE_API_URL || 'https://nexus-logic-backend.onrender.com';
+      const response = await fetch(`${baseUrl}/api/ai-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg, context }),
@@ -54,8 +55,10 @@ export default function AIInsights() {
       const aiMsg: Message = { id: (Date.now()+1).toString(), role: 'ai', text: data.reply || 'I could not process that request. Please try again.', timestamp: new Date().toISOString() };
       setMessages(prev => [...prev, aiMsg]);
       logAction('AI Insights', 'AI Query', msg.substring(0, 60) + (msg.length > 60 ? '...' : ''), 'info');
-    } catch {
-      const errMsg: Message = { id: (Date.now()+1).toString(), role: 'ai', text: 'Connection error. Please ensure the backend is running and try again.', timestamp: new Date().toISOString() };
+    } catch (error) {
+      console.error("AI Insights Connection Error:", error);
+      const baseUrl = import.meta.env.VITE_API_URL || 'https://nexus-logic-backend.onrender.com';
+      const errMsg: Message = { id: (Date.now()+1).toString(), role: 'ai', text: `Connection error. Failed to reach backend at ${baseUrl}. Please ensure the backend is running and try again.`, timestamp: new Date().toISOString() };
       setMessages(prev => [...prev, errMsg]);
     } finally {
       setIsTyping(false);

@@ -18,6 +18,7 @@ import Sustainability from "./pages/Sustainability";
 import AIInsights from "./pages/AIInsights";
 import ReportsAnalytics from "./pages/ReportsAnalytics";
 import AdminIntegrations from "./pages/AdminIntegrations";
+import { useAppContext } from "./context/AppContext";
 import Profile from "./pages/Profile";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -25,13 +26,42 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
+  const { dispatch } = useAppContext();
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        let finalUserData = {
+          name: currentUser.displayName || "User",
+          email: currentUser.email || "",
+          role: "Admin",
+          phone: currentUser.phoneNumber || "+91 98765 43210",
+          company: "Nexus Logix Pvt. Ltd.",
+        };
+        
+        try {
+          const { setDoc, doc, getDoc } = await import("firebase/firestore");
+          const { db } = await import("./firebase");
+          const userRef = doc(db, "users", currentUser.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            finalUserData = { ...finalUserData, ...userSnap.data() } as any;
+          } else {
+            await setDoc(userRef, { ...finalUserData, createdAt: new Date().toISOString() });
+          }
+        } catch (error) {
+          console.error("Error with Firestore user sync:", error);
+        }
+
+        // Sync to AppContext with the final merged data
+        dispatch({ type: "UPDATE_PROFILE", payload: finalUserData });
+      }
       setUser(currentUser);
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [dispatch]);
 
   if (loading) {
     return (

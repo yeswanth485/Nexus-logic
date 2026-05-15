@@ -7,6 +7,8 @@ import {
 import { cn } from "../../lib/utils";
 import { useDashboardStore } from "../../stores/dashboardStore";
 
+import { useAppContext } from "../../context/AppContext";
+
 const NAV_GROUPS = [
   {
     title: "OPERATIONS",
@@ -46,6 +48,8 @@ const NAV_GROUPS = [
 export function Sidebar() {
   const { sidebarOpen } = useDashboardStore();
   const location = useLocation();
+  const { state } = useAppContext();
+  const userProfile = state.profile;
 
   if (!sidebarOpen) return null;
 
@@ -117,12 +121,12 @@ export function Sidebar() {
       {/* Bottom Section */}
       <div className="p-4 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)]">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-full bg-[var(--bg-active)] border border-[var(--border-strong)] flex items-center justify-center text-xs font-bold text-[var(--text-primary)]">
-            RK
+          <div className="w-8 h-8 rounded-full bg-[var(--bg-active)] border border-[var(--border-strong)] flex items-center justify-center text-xs font-bold text-[var(--text-primary)] uppercase">
+            {userProfile.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-[var(--text-primary)] leading-tight">Rajesh Kumar</span>
-            <span className="text-xs text-[var(--text-muted)]">Operations Manager</span>
+            <span className="text-sm font-medium text-[var(--text-primary)] leading-tight">{userProfile.name}</span>
+            <span className="text-xs text-[var(--text-muted)]">{userProfile.role || 'Operations Manager'}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">

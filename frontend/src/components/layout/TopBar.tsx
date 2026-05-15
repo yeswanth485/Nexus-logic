@@ -3,16 +3,19 @@ import { useDashboardStore } from "../../stores/dashboardStore";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth } from "../../firebase";
 import { signOut } from "firebase/auth";
+import { useAppContext } from "../../context/AppContext";
 
 export function TopBar() {
   const { toggleSidebar } = useDashboardStore();
   const location = useLocation();
   const navigate = useNavigate();
+  const { state } = useAppContext();
+  const userProfile = state.profile;
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      navigate("/auth/signin");
+      navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -80,8 +83,8 @@ export function TopBar() {
         </button>
 
         <div className="w-8 h-8 rounded-full bg-[image:var(--gradient-accent)] flex flex-shrink-0 items-center justify-center border border-[var(--border-strong)] ml-2 cursor-pointer relative group">
-          <span className="text-xs font-bold text-white shadow-sm">
-            {auth.currentUser?.displayName ? auth.currentUser.displayName.charAt(0).toUpperCase() : "U"}
+          <span className="text-xs font-bold text-white shadow-sm uppercase">
+            {userProfile?.name ? userProfile.name.charAt(0) : "U"}
           </span>
           <div className="absolute top-10 right-0 hidden group-hover:block bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded p-2 z-50">
             <button onClick={handleSignOut} className="text-sm text-[var(--status-critical)] hover:underline whitespace-nowrap">Sign out</button>
