@@ -1,0 +1,61 @@
+-- ============================================================
+-- Nexus Logix — Firebase / Firestore Collections Schema
+-- (For reference only; Firestore is schema-less)
+-- ============================================================
+
+-- users
+-- ─────
+-- uid          : string  (Firebase Auth UID)
+-- email        : string
+-- displayName  : string
+-- role         : string  ("admin" | "operator" | "viewer")
+-- createdAt    : timestamp
+-- lastLogin    : timestamp
+
+-- shipments
+-- ─────────
+-- id           : string  (auto-id)
+-- trackingNo   : string
+-- origin       : string
+-- destination  : string
+-- status       : string  ("in_transit" | "delivered" | "delayed" | "pending")
+-- carrier      : string
+-- eta          : timestamp
+-- createdAt    : timestamp
+-- updatedAt    : timestamp
+
+-- fleet_vehicles
+-- ──────────────
+-- id           : string
+-- vehicleId    : string
+-- driverName   : string
+-- status       : string  ("active" | "idle" | "maintenance")
+-- lat          : number
+-- lng          : number
+-- fuelLevel    : number  (0-100)
+-- lastUpdated  : timestamp
+
+-- inventory_items
+-- ───────────────
+-- id           : string
+-- sku          : string
+-- name         : string
+-- quantity     : number
+-- warehouseId  : string
+-- reorderPoint : number
+-- updatedAt    : timestamp
+
+-- risk_alerts
+-- ───────────
+-- id           : string
+-- type         : string  ("weather" | "port_congestion" | "customs" | "demand_spike")
+-- severity     : string  ("low" | "medium" | "high" | "critical")
+-- description  : string
+-- affectedRoutes : array<string>
+-- createdAt    : timestamp
+-- resolved     : boolean
+
+-- ============================================================
+-- Firestore Security Rules (firestore.rules)
+-- ============================================================
+-- See ../database/firestore.rules for the rules file.
